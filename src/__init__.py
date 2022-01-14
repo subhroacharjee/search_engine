@@ -1,8 +1,8 @@
 import os
 from flask import Flask, jsonify
-from utils.env import get_env_params
+from src.utils.env import get_env_params
 
-from exception import InvalidApiException
+from src.exception import InvalidApiException
 
 def create_app():
     # import routes here and add them here

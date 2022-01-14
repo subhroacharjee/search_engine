@@ -1,8 +1,22 @@
-from queue import Queue
-import os, threading
+import os, re
+from bs4 import BeautifulSoup as bs
+from selenium import webdriver
+
+from src.utils.env import cwd_path
+from src.constants import URL_REGEX
+
+URL_PATTERN = re.compile(URL_REGEX)
+
 
 MAX_THREADS = 10 # the maximum amount of threads we need to handle the parsing
 MAX_QUEUE_SIZE = 10000
+
+
+options = webdriver.ChromeOptions()
+options.add_argument('--ignore-certificate-errors')
+options.add_argument('--incognito')
+options.add_argument('--headless')
+driver = webdriver.Chrome(os.path.join(cwd_path(),'chromedriver'), chrome_options=options)
 
 '''
 So what we want?
@@ -17,16 +31,54 @@ also we want to save the queue data to some json file so that when process resta
 we need a good exception and signal handling functions
 '''
 
-def parser(url, queue:Queue):
+def parser(url):
     '''
     This function will parse the website and go through all the links and it's content and give us the following
-        1. url
+        1. urls
         2. title
         3. description
         4. tags
-        5. external-links
-        6. host and server (this will help to group all the pages for an website)
-    one page parsed by this function i.e one html page per function call, so http://example.com will be called in one url and http://example.com/about will be called in another.
-    Another thing is that we need to check if url exists or not, that's using database.
+    Args:
+        url (string): url that is to be parsed
+    Returns:
+        int|None the error code in case of error
+        dict|None containing data about the url in format given above
+
     '''
+
+    try:
+        title, description,urls,content = run_selenium(url)
+        return None, content
+    except ValueError as ve:
+        return -1, None
+    except Exception as e:
+        print(e)
+        return -10, None
     pass
+
+def run_selenium(url):
+    if not re.search(URL_PATTERN, url):
+        raise ValueError("Invalid url")
+    driver.get(url)
+    title = driver.title
+    urls = []
+    hyperlinks = driver.find_elements_by_tag_name("a")
+
+    #hyperlinks for urls
+    for i in hyperlinks:
+        urls.append(i.get_attribute('href'))
+    meta_tags = driver.find_elements_by_tag_name("meta")
+    description = ""
+
+    # getting description from meta tag
+    for meta in meta_tags:
+        if meta.get_attribute("name") == "description":
+            description = meta.get_attribute("content")
+            break
+    
+    # the html content for tokenisation
+    content = driver.page_source
+    return title, description,urls,content
+
+
+   
