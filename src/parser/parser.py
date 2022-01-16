@@ -12,16 +12,7 @@ MAX_QUEUE_SIZE = 10000
 
 class Parser:
     '''
-    So what we want?
-    we want to parse a website and store external links to other website to the queue
-    we want that there will be a thread which will call parser to a website.
-    we want a program to check the queue and create thread with one thread parsing 1 website if entry exists in queue
-    we want a program which will check if queue if full or not, if queue is full then it will make that thread wait, until all the urls are in the queue
-    we want a program to check if we are using maximum amount of threads and in case we are doing that we will add no more threads until a thread is stopped.
-    we want each thread to parse the data of websites and data to db[name of website, title, description]
-    also we want to run all of these as well
-    also we want to save the queue data to some json file so that when process restarts after a crash or restarting it doesn't starts from the begining.
-    we need a good exception and signal handling functions
+    In this class we are validating url and then parsing the url using webdriver and retriveing the, tags, description title, and other links
     '''
     def uri_validator(self, x):
         try:
@@ -51,12 +42,6 @@ class Parser:
             result['title'], result['description'],result['urls'],content = Driver.get_website_data(url)
             result['tags'] = self.get_tags(content)
             return result
-        except ValueError as ve:
-            print(ve)
-            return None
-        except TypeError as te:
-            print(te)
-            return None
         except Exception as e:
             print(e)
             return None
@@ -79,7 +64,7 @@ class Parser:
         Remove the prepositions and non-alphanumeric characters from the content and break them into tags
         '''
         token = tokenizer(content)
-        for tk in token:
+        for tk in token.copy():
             if not re.search(r'(\w)', tk):
                 token.remove(tk)
         
