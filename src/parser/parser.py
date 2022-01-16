@@ -41,6 +41,7 @@ class Parser:
         try:
             result['title'], result['description'],result['urls'],content = Driver.get_website_data(url)
             result['tags'] = self.get_tags(content)
+            result['url'] = url
             return result
         except Exception as e:
             print(e)
