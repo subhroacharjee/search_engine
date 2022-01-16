@@ -4,9 +4,6 @@ from click import pass_context
 from selenium import webdriver
 
 from src.utils.env import cwd_path
-from src.constants import URL_REGEX
-
-URL_PATTERN = re.compile(URL_REGEX)
 
 class Driver:
     def __init__(self):
