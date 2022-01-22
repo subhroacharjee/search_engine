@@ -53,6 +53,15 @@ WHERE url=?
 LIMIT 1
 """
 
+CHECK_IF_URL_IS_UNPARSED = """
+SELECT 
+    *
+FROM queue
+WHERE url=?
+AND completed=0
+LIMIT 1
+"""
+
 GET_ALL_UNPARSED_URLS = """
 SELECT 
     url

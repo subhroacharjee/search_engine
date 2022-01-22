@@ -19,3 +19,11 @@ so we already have a parser which takes a url and returns us a dict which contai
 3. In case a thread finishes it will take the data available in the array and then store it to database using database model.
 4. we need that wrapper class to have a queue which can hold the urls and fire off parser function using url inside the queue.
 '''
+from .database_handler import DatabaseHandler
+from .queue_handler import QueueHandler
+import os
+
+DB_PATH = os.environ.get('DB_PATH')
+
+db = DatabaseHandler(DB_PATH)
+queue = QueueHandler()

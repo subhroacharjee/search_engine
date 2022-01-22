@@ -5,7 +5,7 @@ import sqlite3
 import os, time
 
 from src.utils.env import cwd_path
-from src.constants import (CHECK_IF_URL_EXISTS, CREATE_QUEUE_TABLE_QUERIES, CREATE_SEARCH_TABLE_QUERIES, 
+from src.constants import (CHECK_IF_URL_EXISTS, CHECK_IF_URL_IS_UNPARSED, CREATE_QUEUE_TABLE_QUERIES, CREATE_SEARCH_TABLE_QUERIES, 
 ADD_TO_SEARCH_TABLE, GET_ALL_UNPARSED_URLS, MARK_URL_COMPLETED_STATUS, ADD_TO_QUEUE_TABLE)
 
 class DatabaseHandler:
@@ -46,6 +46,13 @@ class DatabaseHandler:
         finally:
             if conn:
                 conn.close()
+    
+    def restart_db(self):
+        os.unlink(self.path)
+        with open(self.path, 'x') as _:
+            pass
+        
+        self.__create_base_tables()
         
     def add_website_data(self, **data):
         '''
@@ -124,6 +131,28 @@ class DatabaseHandler:
         try:
             conn = self.__create_connection()
             cur = conn.execute(CHECK_IF_URL_EXISTS, (url,))
+            row = cur.fetchone()
+            return len(row) >0 and row[1] == url
+        except Exception as e:
+            print(f"{e} \n Gotcalled in check_if_url_is_present")
+            raise e
+        finally:
+            if conn:
+                conn.close()
+    
+    def check_if_url_is_parsed(self, url):
+        '''
+        Args:
+            url(str) url to be searched
+        Returns:
+            bool : True if exists and False if not
+        '''
+
+        conn = None
+
+        try:
+            conn = self.__create_connection()
+            cur = conn.execute(CHECK_IF_URL_IS_UNPARSED, (url,))
             row = cur.fetchone()
             return len(row) >0 and row[1] == url
         except Exception as e:
