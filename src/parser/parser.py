@@ -3,11 +3,8 @@ from urllib.parse import urlparse
 from bs4 import BeautifulSoup
 
 from src.parser.driver import Driver
-from src.constants import URL_REGEX
 from src.utils.tokenizer import tokenizer
 
-MAX_THREADS = 10 # the maximum amount of threads we need to handle the parsing
-MAX_QUEUE_SIZE = 10000
 
 
 class Parser:
